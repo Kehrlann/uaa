@@ -310,37 +310,6 @@
     <!--apply the oauth client context -->
     <oauth:client id="oauth2ClientFilter"/>
 
-    <util:map id="notifications" key-type="org.cloudfoundry.identity.uaa.message.MessageType">
-        <entry key="CREATE_ACCOUNT_CONFIRMATION">
-            <map>
-                <entry key="description" value="Send activation code"/>
-                <entry key="id" value="f7a85fdc-d920-41f0-b3a4-55db08e408ce"/>
-                <entry key="critical" value="true" value-type="java.lang.Boolean"/>
-            </map>
-        </entry>
-        <entry key="PASSWORD_RESET">
-            <map>
-                <entry key="description" value="Reset Password"/>
-                <entry key="id" value="141200f6-93bd-4761-a721-941ab511ba2c"/>
-                <entry key="critical" value="true" value-type="java.lang.Boolean"/>
-            </map>
-        </entry>
-        <entry key="CHANGE_EMAIL">
-            <map>
-                <entry key="description" value="Change Email"/>
-                <entry key="id" value="712de257-a7fa-44cb-b1ac-8a6588d1be23"/>
-                <entry key="critical" value="true" value-type="java.lang.Boolean"/>
-            </map>
-        </entry>
-        <entry key="INVITATION">
-            <map>
-                <entry key="description" value="Invitation"/>
-                <entry key="id" value="e6722687-3f0f-4e7a-9925-839a04712cea"/>
-                <entry key="critical" value="true" value-type="java.lang.Boolean"/>
-            </map>
-        </entry>
-    </util:map>
-
     <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
         <mvc:message-converters>
             <bean class="org.cloudfoundry.identity.uaa.authentication.manager.AutologinRequestConverter"/>
@@ -394,36 +363,6 @@
     <bean id="buildInfo" class="org.cloudfoundry.identity.uaa.home.BuildInfo"/>
 
     <bean id="thymeleafConfig" class="org.cloudfoundry.identity.uaa.login.ThymeleafConfig"/>
-
-    <bean id="emailService" class="org.cloudfoundry.identity.uaa.message.EmailService">
-        <constructor-arg index="0"
-                         ref="#{T(org.springframework.util.StringUtils).hasText('${smtp.host:}') ? 'smtpJavaMailSender' : 'fakeJavaMailSender'}"/>
-        <constructor-arg index="1" value="${login.url:http://localhost:8080/uaa}"/>
-        <constructor-arg index="2" value="${smtp.from_address:}"/>
-    </bean>
-
-    <bean id="smtpJavaMailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-        <property name="host" value="${smtp.host:localhost}"/>
-        <property name="port" value="${smtp.port:25}"/>
-        <property name="username" value="${smtp.user:}"/>
-        <property name="password" value="${smtp.password:}"/>
-        <property name="javaMailProperties">
-            <props>
-                <prop key="mail.smtp.auth">${smtp.auth:false}</prop>
-                <prop key="mail.smtp.starttls.enable">${smtp.starttls:false}</prop>
-                <prop key="mail.smtp.ssl.protocols">${smtp.sslprotocols:TLSv1.2}</prop>
-            </props>
-        </property>
-    </bean>
-
-    <bean id="fakeJavaMailSender" class="org.cloudfoundry.identity.uaa.message.util.FakeJavaMailSender"/>
-
-    <bean id="notificationsService" class="org.cloudfoundry.identity.uaa.message.NotificationsService">
-        <constructor-arg ref="notificationsTemplate"/>
-        <constructor-arg ref="notificationsUrl"/>
-        <constructor-arg ref="notifications"/>
-        <constructor-arg value="${notifications.send_in_default_zone:true}"/>
-    </bean>
 
     <bean id="accountCreationService" class="org.cloudfoundry.identity.uaa.account.EmailAccountCreationService">
         <constructor-arg ref="mailTemplateEngine"/>
