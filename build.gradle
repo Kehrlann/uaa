@@ -129,6 +129,17 @@ subprojects {
             exceptionFormat("full")
             // Uncomment the following line to see all standard output from tests (there's a ton of it!)
             //showStandardStreams = true
+            afterSuite { desc, result ->
+                if (!desc.parent) { // will match the outermost suite
+                    def output =
+                            "Tests ${desc.name}. " +
+                                    "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped). " +
+                                    "Duration: ${result.endTime - result.startTime}ms."
+                    def startItem = '|  ', endItem = '  |'
+                    def repeatLength = startItem.length() + output.length() + endItem.length()
+                    println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
+                }
+            }
         }
     }
 
@@ -210,8 +221,7 @@ cargo {
         String activeSpringProfiles = System.getProperty("spring.profiles.active", "").split(',');
         if (activeSpringProfiles.contains("debugs") || Boolean.valueOf(System.getProperty("xdebugs"))) {
             jvmArgs = String.format("%s -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005", jvmArgs)
-        }
-        else if (activeSpringProfiles.contains("debug") || Boolean.valueOf(System.getProperty("xdebug"))) {
+        } else if (activeSpringProfiles.contains("debug") || Boolean.valueOf(System.getProperty("xdebug"))) {
             jvmArgs = String.format("%s -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005", jvmArgs)
         }
 
