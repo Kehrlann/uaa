@@ -1,5 +1,7 @@
 package org.cloudfoundry.identity.uaa.login;
 
+import java.util.Collections;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.cloudfoundry.identity.uaa.DefaultTestContext;
 import org.cloudfoundry.identity.uaa.account.EmailAccountCreationService;
@@ -29,6 +31,7 @@ import org.cloudfoundry.identity.uaa.zone.MultitenancyFixture;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mock.env.MockPropertySource;
@@ -42,9 +45,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StandardServletEnvironment;
-
-import java.util.Collections;
-
 import static org.cloudfoundry.identity.uaa.mock.util.MockMvcUtils.CookieCsrfPostProcessor.cookieCsrf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -85,17 +85,17 @@ class AccountsControllerMockMvcTests {
     @Autowired
     private FakeJavaMailSender fakeJavaMailSender;
     private JavaMailSender originalEmailSender;
+    @Autowired
+    private EmailService emailService;
 
     @BeforeEach
     void setUp() {
         testClient = new TestClient(mockMvc);
 
-        EmailService emailService = webApplicationContext.getBean("emailService", EmailService.class);
         originalEmailSender = emailService.getMailSender();
         emailService.setMailSender(fakeJavaMailSender);
 
         userEmail = "user" + new AlphanumericRandomValueStringGenerator().generate() + "@example.com";
-        assertNotNull(webApplicationContext.getBean("messageService"));
         IdentityZoneHolder.setProvisioning(webApplicationContext.getBean(IdentityZoneProvisioning.class));
 
         mockMvcTestClient = new MockMvcTestClient(mockMvc);
@@ -111,7 +111,7 @@ class AccountsControllerMockMvcTests {
 
     @AfterEach
     void clearEmails() {
-        webApplicationContext.getBean("emailService", EmailService.class).setMailSender(originalEmailSender);
+        emailService.setMailSender(originalEmailSender);
         fakeJavaMailSender.clearMessage();
     }
 

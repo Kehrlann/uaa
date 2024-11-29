@@ -2,7 +2,6 @@ package org.cloudfoundry.identity.uaa.impl.config;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
 
 import org.cloudfoundry.identity.uaa.message.EmailService;
@@ -20,35 +19,34 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
-import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.util.StringUtils;
 
+/**
+ * All beans are marked lazy because they might never be used.
+ * <p>
+ * There two options for {@link MessageService}, either an {@link EmailService} which sends an e-mail or a
+ * {@link NotificationsService} which makes an HTTP request. Notifications have precedence over e-mail,
+ * which is the "fallback" option.
+ */
+@Lazy
 @Configuration
 @EnableConfigurationProperties(SmtpProperties.class)
 public class LoginServerConfig {
 
     /**
-     * Fallback bean for when there is no "notifications.url". Lazy because we may not need to wire this bean
-     * if the {@link NotificationsService} is present.
+     * Fallback bean for when there is no "notifications.url".
+     * TODO: dgarnier annotate with @Fallback in Boot 3.4
      *
      * @return -
      */
-    @Lazy
     @Bean
     public MessageService emailMessageService(
-            Environment environment,
-            // dgarnier: use UAA_DEFAULT_UR
+            // dgarnier: use DEFAULT_UAA_URL
             @Value("${login.url:http://localhost:8080/uaa}") String loginUrl,
+            JavaMailSender mailSender,
             SmtpProperties smtpProperties,
             IdentityZoneManager identityZoneManager) {
-
-        var mailSender = Optional.ofNullable(environment.getProperty("smtp.host"))
-                .filter(StringUtils::hasText)
-                .<JavaMailSender>map(host -> smtpMailSender(smtpProperties))
-                .orElseGet(FakeJavaMailSender::new);
-
         return new EmailService(
                 mailSender,
                 loginUrl,
@@ -57,19 +55,32 @@ public class LoginServerConfig {
         );
     }
 
-    private static JavaMailSenderImpl smtpMailSender(SmtpProperties smtpProperties) {
-        var realMailSender = new JavaMailSenderImpl();
-        realMailSender.setHost(smtpProperties.host());
-        realMailSender.setPort(smtpProperties.port());
-        realMailSender.setPassword(smtpProperties.password());
-        realMailSender.setUsername(smtpProperties.user());
+    /**
+     * Fallback for SMTP mail sender, when no real mail sender is used. This is mostly used in tests.
+     *
+     * @return -
+     */
+    @Bean
+    JavaMailSender fakeJavaMailSender() {
+        return new FakeJavaMailSender();
+    }
+
+    @Bean
+    @Primary
+    @ConditionalOnProperty(value = "smtp.host", matchIfMissing = false)
+    JavaMailSender smtpMailSender(SmtpProperties smtpProperties) {
+        var mailSender = new JavaMailSenderImpl();
+        mailSender.setHost(smtpProperties.host());
+        mailSender.setPort(smtpProperties.port());
+        mailSender.setPassword(smtpProperties.password());
+        mailSender.setUsername(smtpProperties.user());
 
         var javaMailProperties = new Properties();
         javaMailProperties.put("mail.smtp.auth", smtpProperties.auth());
         javaMailProperties.put("mail.smtp.starttls.enable", smtpProperties.starttls());
         javaMailProperties.put("mail.smtp.ssl.protocols", smtpProperties.sslprotocols());
-        realMailSender.setJavaMailProperties(javaMailProperties);
-        return realMailSender;
+        mailSender.setJavaMailProperties(javaMailProperties);
+        return mailSender;
     }
 
     @Configuration

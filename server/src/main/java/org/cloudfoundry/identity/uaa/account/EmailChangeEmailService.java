@@ -22,10 +22,12 @@ import org.thymeleaf.context.Context;
 
 import java.sql.Timestamp;
 import java.util.*;
-
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 import static org.cloudfoundry.identity.uaa.codestore.ExpiringCodeType.EMAIL;
 import static org.cloudfoundry.identity.uaa.util.UaaUrlUtils.findMatchingRedirectUri;
 
+@Component
 public class EmailChangeEmailService implements ChangeEmailService {
 
     static final String CHANGE_EMAIL_REDIRECT_URL = "change_email_redirect_url";
@@ -38,12 +40,14 @@ public class EmailChangeEmailService implements ChangeEmailService {
     private final MultitenantClientServices clientDetailsService;
     private final IdentityZoneManager identityZoneManager;
 
-    EmailChangeEmailService(final TemplateEngine templateEngine,
-                            final MessageService messageService,
-                            final ScimUserProvisioning scimUserProvisioning,
-                            final ExpiringCodeStore codeStore,
-                            final MultitenantClientServices clientDetailsService,
-                            final IdentityZoneManager identityZoneManager) {
+    EmailChangeEmailService(
+            @Qualifier("mailTemplateEngine") final TemplateEngine templateEngine,
+            final MessageService messageService,
+            final ScimUserProvisioning scimUserProvisioning,
+            final ExpiringCodeStore codeStore,
+            final MultitenantClientServices clientDetailsService,
+            final IdentityZoneManager identityZoneManager
+    ) {
         this.templateEngine = templateEngine;
         this.messageService = messageService;
         this.scimUserProvisioning = scimUserProvisioning;

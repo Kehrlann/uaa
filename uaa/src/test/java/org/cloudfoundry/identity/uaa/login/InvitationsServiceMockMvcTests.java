@@ -78,7 +78,6 @@ public class InvitationsServiceMockMvcTests {
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    @Qualifier("emailService")
     EmailService emailService;
 
     public static final String REDIRECT_URI = "http://invitation.redirect.test";

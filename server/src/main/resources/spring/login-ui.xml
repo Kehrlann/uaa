@@ -364,15 +364,6 @@
 
     <bean id="thymeleafConfig" class="org.cloudfoundry.identity.uaa.login.ThymeleafConfig"/>
 
-    <bean id="accountCreationService" class="org.cloudfoundry.identity.uaa.account.EmailAccountCreationService">
-        <constructor-arg ref="mailTemplateEngine"/>
-        <constructor-arg ref="messageService"/>
-        <constructor-arg ref="codeStore"/>
-        <constructor-arg ref="scimUserProvisioning"/>
-        <constructor-arg ref="jdbcClientDetailsService"/>
-        <constructor-arg ref="uaaPasswordValidator"/>
-    </bean>
-
     <bean id="uaaPasswordValidator" class="org.cloudfoundry.identity.uaa.scim.validate.UaaPasswordPolicyValidator">
         <constructor-arg ref="globalPasswordPolicy"/>
     </bean>
@@ -392,14 +383,6 @@
         <constructor-arg ref="uaaPasswordValidator"/>
         <constructor-arg ref="jdbcClientDetailsService"/>
         <constructor-arg ref="messagePropertiesSource"/>
-    </bean>
-
-    <bean id="changeEmailService" class="org.cloudfoundry.identity.uaa.account.EmailChangeEmailService">
-        <constructor-arg ref="mailTemplateEngine"/>
-        <constructor-arg ref="messageService"/>
-        <constructor-arg ref="jdbcClientDetailsService"/>
-        <constructor-arg ref="scimUserProvisioning"/>
-        <constructor-arg ref="codeStore"/>
     </bean>
 
     <bean id="activeKeyService" class="org.cloudfoundry.identity.uaa.cypto.EncryptionKeyService"/>
