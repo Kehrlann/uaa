@@ -1,11 +1,8 @@
 package org.cloudfoundry.identity.uaa.db.beans;
 
 import javax.sql.DataSource;
-import org.cloudfoundry.identity.uaa.db.DataSourceAccessor;
 import org.cloudfoundry.identity.uaa.db.FixFailedBackportMigrations_4_0_4;
-import org.cloudfoundry.identity.uaa.db.postgresql.V1_5_3__InitialDBScript;
 import org.flywaydb.core.Flyway;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
@@ -25,20 +22,14 @@ public class FlywayConfiguration {
    */
   static final String VERSION_TABLE = "schema_version";
 
-  /**
-   * @param dataSourceAccessor This bean does NOT need need an instance of {@link DataSourceAccessor}.
-   *                           However, other Flyway objects (example {@link V1_5_3__InitialDBScript}
-   *                           DO make use of {@link DataSourceAccessor}
-   */
   @Bean
   public Flyway baseFlyway(
-      DataSource dataSource,
-      DataSourceAccessor dataSourceAccessor,
-      @Qualifier("platform") String platform) {
+          DataSource dataSource,
+          DatabaseProperties databaseProperties) { // TODO dgarnier, infer platform from env
     Flyway flyway = Flyway.configure()
         .baselineOnMigrate(true)
         .dataSource(dataSource)
-        .locations("classpath:org/cloudfoundry/identity/uaa/db/" + platform + "/")
+        .locations("classpath:org/cloudfoundry/identity/uaa/db/" + databaseProperties.getType() + "/")
         .baselineVersion("1.5.2")
         .validateOnMigrate(false)
         .table(VERSION_TABLE)
