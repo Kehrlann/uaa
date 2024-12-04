@@ -1,0 +1,11 @@
+name: uaa
+
+services:
+  postgres:
+    image: "postgres:17.2"
+    ports:
+      - 5432:5432
+    volumes:
+      - ./scripts/postgresql:/docker-entrypoint-initdb.d/
+    environment:
+      - POSTGRES_PASSWORD=changeme
