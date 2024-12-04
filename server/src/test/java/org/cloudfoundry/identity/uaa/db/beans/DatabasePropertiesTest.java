@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DatabasePropertiesTest {
 
     @Nested
+    @ActiveProfiles("default")
     @ExtendWith(SpringExtension.class)
     @Import(DatabaseConfiguration.class)
     class Defaults {
