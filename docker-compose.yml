@@ -9,3 +9,12 @@ services:
       - ./scripts/postgresql:/docker-entrypoint-initdb.d/
     environment:
       - POSTGRES_PASSWORD=changeme
+
+  mysql:
+    image: "mysql:8"
+    ports:
+      - 3306:3306
+    volumes:
+      - ./scripts/mysql:/docker-entrypoint-initdb.d/
+    environment:
+      - MYSQL_ROOT_PASSWORD=changeme
