@@ -5,7 +5,6 @@ import org.cloudfoundry.identity.uaa.extensions.PollutionPreventionExtension;
 import org.cloudfoundry.identity.uaa.util.beans.PasswordEncoderConfig;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.context.annotation.ImportResource;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
