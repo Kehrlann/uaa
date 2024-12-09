@@ -1,0 +1,38 @@
+name: uaa
+
+services:
+  postgres:
+    image: "postgres:17.2"
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgresql:/docker-entrypoint-initdb.d/
+    environment:
+      - POSTGRES_PASSWORD=changeme
+  mysql:
+    image: "mysql:8"
+    ports:
+    - 3306:3306
+    volumes:
+    - ./mysql:/docker-entrypoint-initdb.d/
+    environment:
+    - MYSQL_ROOT_PASSWORD=changeme
+  openldap:
+    image: docker.io/bitnami/openldap:2.6
+    ports:
+      - '389:1389'
+      - '636:1636'
+    # docs of these env vars: https://github.com/bitnami/containers/tree/2724f9cd02b3b4e7986a1e2a0b0b30af3737bbd2/bitnami/openldap#configuration
+    environment:
+      - LDAP_ROOT=dc=test,dc=com
+      - LDAP_ADMIN_USERNAME=admin
+      - LDAP_ADMIN_PASSWORD=password
+      - LDAP_USERS=user01,user02
+      - LDAP_PASSWORDS=password1,password2
+      - LDAP_GROUP=some-ldap-group
+    volumes:
+      - 'openldap_data:/bitnami/openldap'
+
+volumes:
+  openldap_data:
+    driver: local
