@@ -2,9 +2,8 @@ package org.cloudfoundry.identity.uaa.db;
 
 import org.cloudfoundry.identity.uaa.db.mysql.V1_5_4__NormalizeTableAndColumnNames;
 import org.cloudfoundry.identity.uaa.extensions.PollutionPreventionExtension;
+import org.cloudfoundry.identity.uaa.extensions.profiles.EnabledIfProfile;
 import org.cloudfoundry.identity.uaa.util.beans.PasswordEncoderConfig;
-import org.junit.Assume;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -17,7 +16,6 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.web.context.WebApplicationContext;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -65,22 +63,13 @@ class MySQLInitializer implements ApplicationContextInitializer<ConfigurableAppl
 },
         initializers = MySQLInitializer.class
 )
+@EnabledIfProfile({"postgresql", "mysql"})
 class TableAndColumnNormalizationTest {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private DataSource dataSource;
-
-    @BeforeEach
-    void checkMysqlOrPostgresqlProfile(
-            @Autowired WebApplicationContext webApplicationContext
-    ) {
-        Assume.assumeTrue(
-                Arrays.asList(webApplicationContext.getEnvironment().getActiveProfiles()).contains("mysql") ||
-                        Arrays.asList(webApplicationContext.getEnvironment().getActiveProfiles()).contains("postgresql")
-        );
-    }
 
     @Test
     void checkTables() throws Exception {

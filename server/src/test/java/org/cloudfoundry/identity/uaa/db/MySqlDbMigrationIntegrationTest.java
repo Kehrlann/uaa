@@ -1,28 +1,24 @@
 package org.cloudfoundry.identity.uaa.db;
 
-import org.junit.Test;
+import org.cloudfoundry.identity.uaa.extensions.profiles.EnabledIfProfile;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static junit.framework.TestCase.fail;
-import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.fail;
 
+@EnabledIfProfile("mysql")
 public class MySqlDbMigrationIntegrationTest extends DbMigrationIntegrationTestParent {
 
     private final String checkPrimaryKeyExists = "SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND CONSTRAINT_NAME = 'PRIMARY'";
     private final String getAllTableNames = "SELECT distinct TABLE_NAME from information_schema.KEY_COLUMN_USAGE where TABLE_SCHEMA = ?";
     private final String insertNewOauthCodeRecord = "insert into oauth_code(code) values('code');";
-
-    @Override
-    protected String onlyRunTestsForActiveSpringProfileName() {
-        return "mysql";
-    }
 
     @Test
     public void insertMissingPrimaryKeys_onMigrationOnNewDatabase() {
