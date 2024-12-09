@@ -7,8 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import static org.cloudfoundry.identity.uaa.audit.AuditEventType.PrincipalAuthenticationFailure;
 import static org.cloudfoundry.identity.uaa.audit.AuditEventType.UserAuthenticationFailure;
@@ -56,14 +61,20 @@ class JdbcAuditServiceTests {
 
     @Test
     void findMethodOnlyReturnsEventsWithinRequestedPeriod() {
-        long now = System.currentTimeMillis();
+        // Timezone offsets with MySQL requires UTC conversions
+        var now = Instant.now()
+                .atOffset(ZoneOffset.UTC)
+                .toZonedDateTime()
+                .withZoneSameLocal(ZoneId.systemDefault());
+
         auditService.log(getAuditEvent(PrincipalAuthenticationFailure, "clientA"), getAuditEvent(PrincipalAuthenticationFailure, "clientA").getIdentityZoneId());
         // Set the created column to one hour past
-        jdbcTemplate.update("update sec_audit set created=?", new Timestamp(now - 3600 * 1000));
+        var cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        jdbcTemplate.update("update sec_audit set created=?", now.minus(Duration.ofHours(1)).toLocalDateTime());
         auditService.log(getAuditEvent(PrincipalAuthenticationFailure, "clientA"), getAuditEvent(PrincipalAuthenticationFailure, "clientA").getIdentityZoneId());
         auditService.log(getAuditEvent(PrincipalAuthenticationFailure, "clientB"), getAuditEvent(PrincipalAuthenticationFailure, "clientB").getIdentityZoneId());
         // Find events within last 2 mins
-        List<AuditEvent> events = auditService.find("clientA", now - 120 * 1000, IdentityZone.getUaaZoneId());
+        List<AuditEvent> events = auditService.find("clientA", (now.toEpochSecond() * 1000) - 120 * 1000, IdentityZone.getUaaZoneId());
         assertEquals(1, events.size());
     }
 
