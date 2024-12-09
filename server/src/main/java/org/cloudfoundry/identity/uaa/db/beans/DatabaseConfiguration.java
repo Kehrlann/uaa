@@ -3,6 +3,7 @@ package org.cloudfoundry.identity.uaa.db.beans;
 import org.cloudfoundry.identity.uaa.db.DatabasePlatform;
 import org.cloudfoundry.identity.uaa.resources.jdbc.HsqlDbLimitSqlAdapter;
 import org.cloudfoundry.identity.uaa.resources.jdbc.LimitSqlAdapter;
+import org.cloudfoundry.identity.uaa.resources.jdbc.MySqlLimitSqlAdapter;
 import org.cloudfoundry.identity.uaa.resources.jdbc.PostgresLimitSqlAdapter;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -62,7 +63,7 @@ public class DatabaseConfiguration {
 
         @Bean
         LimitSqlAdapter limitSqlAdapter() {
-            return new PostgresLimitSqlAdapter();
+            return new MySqlLimitSqlAdapter();
         }
 
     }
