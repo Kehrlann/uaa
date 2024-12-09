@@ -1040,6 +1040,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
     @Test
     void getToken_withPasswordGrantType_resultsInUserLastLogonTimestampUpdate() throws Exception {
+        long delayTime = 5;
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
         ScimUser user = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
@@ -1048,7 +1049,9 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
         String accessToken = getAccessTokenForPasswordGrant(username);
         Long firstTimestamp = getPreviousLogonTime(accessToken);
-
+        //simulate two sequential tests
+        //on a fast processor, there isn't enough granularity in the time
+        Thread.sleep(delayTime);
         String accessToken2 = getAccessTokenForPasswordGrant(username);
         Long secondTimestamp = getPreviousLogonTime(accessToken2);
 
