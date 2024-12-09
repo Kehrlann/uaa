@@ -2,18 +2,19 @@ package org.cloudfoundry.identity.uaa.scim.jdbc;
 
 import org.assertj.core.api.Assertions;
 import org.cloudfoundry.identity.uaa.annotations.WithDatabaseContext;
+import org.cloudfoundry.identity.uaa.oauth.common.util.RandomValueStringGenerator;
 import org.cloudfoundry.identity.uaa.resources.jdbc.JdbcPagingListFactory;
 import org.cloudfoundry.identity.uaa.resources.jdbc.LimitSqlAdapter;
 import org.cloudfoundry.identity.uaa.scim.ScimGroup;
 import org.cloudfoundry.identity.uaa.scim.ScimGroupMember;
 import org.cloudfoundry.identity.uaa.scim.ScimUser;
 import org.cloudfoundry.identity.uaa.scim.ScimUserProvisioning;
-import org.cloudfoundry.identity.uaa.scim.exception.ScimResourceConstraintFailedException;
 import org.cloudfoundry.identity.uaa.scim.exception.InvalidScimResourceException;
+import org.cloudfoundry.identity.uaa.scim.exception.ScimResourceConstraintFailedException;
 import org.cloudfoundry.identity.uaa.scim.exception.ScimResourceNotFoundException;
 import org.cloudfoundry.identity.uaa.scim.test.TestUtils;
-import org.cloudfoundry.identity.uaa.util.beans.DbUtils;
 import org.cloudfoundry.identity.uaa.util.TimeServiceImpl;
+import org.cloudfoundry.identity.uaa.util.beans.DbUtils;
 import org.cloudfoundry.identity.uaa.zone.IdentityZone;
 import org.cloudfoundry.identity.uaa.zone.IdentityZoneHolder;
 import org.cloudfoundry.identity.uaa.zone.JdbcIdentityZoneProvisioning;
@@ -26,10 +27,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.cloudfoundry.identity.uaa.oauth.common.util.RandomValueStringGenerator;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.security.SecureRandom;
 import java.sql.SQLException;
@@ -79,6 +81,8 @@ class JdbcScimGroupProvisioningTests {
     private String group1Description;
     private String group2Description;
     private String group3Description;
+    @Autowired
+    private Environment environment;
 
     @BeforeEach
     void initJdbcScimGroupProvisioningTests() throws SQLException {
@@ -528,7 +532,11 @@ class JdbcScimGroupProvisioningTests {
     }
 
     private void validateGroupCountInZone(int expected, String zoneId) {
-        int existingGroupCount = jdbcTemplate.queryForObject("select count(id) from groups where identity_zone_id='" + zoneId + "'", Integer.class);
+        // mysql requires backticks for the "groups" table, see mysql/V1_5_2__initial_db.sql
+        var profiles = Arrays.asList(environment.getActiveProfiles());
+        var tableName = profiles.contains("mysql") ? "`groups`" : "groups";
+
+        int existingGroupCount = jdbcTemplate.queryForObject("select count(id) from " + tableName + " where identity_zone_id='" + zoneId + "'", Integer.class);
         assertEquals(expected, existingGroupCount);
     }
 
