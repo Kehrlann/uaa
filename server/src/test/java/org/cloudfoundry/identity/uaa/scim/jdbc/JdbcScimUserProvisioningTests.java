@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +72,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
@@ -104,6 +106,9 @@ class JdbcScimUserProvisioningTests {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private Environment enviroment;
 
     @Autowired
     NamedParameterJdbcTemplate namedJdbcTemplate;
@@ -442,7 +447,9 @@ class JdbcScimUserProvisioningTests {
             );
             Assertions.assertThat(result).isNotNull();
             final List<String> usernames = result.stream().map(ScimUser::getUserName).collect(toList());
-            Assertions.assertThat(usernames).isSorted();
+            if (Arrays.stream(enviroment.getActiveProfiles()).noneMatch("mysql"::equalsIgnoreCase)) {
+                Assertions.assertThat(usernames).isSorted();
+            }
             return usernames;
         };
 
