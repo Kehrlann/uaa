@@ -10,7 +10,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=changeme
   mysql:
-    image: "mysql:8"
+    image: "mysql:5.7.44-oraclelinux7"
     ports:
     - 3306:3306
     volumes:
