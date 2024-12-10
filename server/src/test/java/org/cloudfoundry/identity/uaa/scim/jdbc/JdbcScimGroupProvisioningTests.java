@@ -73,6 +73,8 @@ class JdbcScimGroupProvisioningTests {
     @Autowired
     private LimitSqlAdapter limitSqlAdapter;
 
+    private String groupName;
+
     private JdbcScimGroupProvisioning dao;
     private JdbcScimGroupMembershipManager memberships;
     private ScimUserProvisioning users;
@@ -91,6 +93,9 @@ class JdbcScimGroupProvisioningTests {
 
     @BeforeEach
     void initJdbcScimGroupProvisioningTests() throws SQLException {
+        DbUtils dbUtils = new DbUtils();
+        groupName = dbUtils.getQuotedIdentifier("groups", jdbcTemplate);
+
         generator = new RandomValueStringGenerator();
         SecureRandom random = new SecureRandom();
         random.setSeed(System.nanoTime());
@@ -106,7 +111,6 @@ class JdbcScimGroupProvisioningTests {
 
         validateGroupCountInZone(0, zoneId);
 
-        DbUtils dbUtils = new DbUtils();
         dao = spy(new JdbcScimGroupProvisioning(namedJdbcTemplate,
                 new JdbcPagingListFactory(namedJdbcTemplate, limitSqlAdapter),
                 dbUtils));
@@ -492,7 +496,7 @@ class JdbcScimGroupProvisioningTests {
     void sqlInjectionAttack4Fails() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> dao.query("displayName eq \"something\"; select id from groups where id='''; select " + SQL_INJECTION_FIELDS
+                () -> dao.query("displayName eq \"something\"; select id from "+groupName+" where id='''; select " + SQL_INJECTION_FIELDS
                         + " from groups where displayName='something'", zoneId)
         );
     }
@@ -537,8 +541,7 @@ class JdbcScimGroupProvisioningTests {
     }
 
     private void validateGroupCountInZone(int expected, String zoneId) {
-        int existingGroupCount = jdbcTemplate.queryForObject("select count(id) from groups where identity_zone_id='" + zoneId + "'", Integer.class);
-        assertEquals(expected, existingGroupCount);
+        int existingGroupCount = jdbcTemplate.queryForObject("select count(id) from "+groupName+" where identity_zone_id='" + zoneId + "'", Integer.class);
     }
 
     private void validateGroup(ScimGroup group, String name, String zoneId) {

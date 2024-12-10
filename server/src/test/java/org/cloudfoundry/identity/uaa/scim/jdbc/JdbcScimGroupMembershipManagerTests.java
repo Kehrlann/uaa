@@ -96,6 +96,8 @@ class JdbcScimGroupMembershipManagerTests {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    private String groupName;
+
     @BeforeEach
     void setUp() throws SQLException {
         generator = new RandomValueStringGenerator();
@@ -103,6 +105,7 @@ class JdbcScimGroupMembershipManagerTests {
         uaaIdentityZone = IdentityZone.getUaa();
 
         dbUtils = new DbUtils();
+        groupName = dbUtils.getQuotedIdentifier("groups", jdbcTemplate);
 
         JdbcPagingListFactory pagingListFactory = new JdbcPagingListFactory(namedJdbcTemplate, limitSqlAdapter);
         JdbcScimUserProvisioning jdbcScimUserProvisioning = new JdbcScimUserProvisioning(namedJdbcTemplate, pagingListFactory, passwordEncoder, new IdentityZoneManagerImpl(), new JdbcIdentityZoneProvisioning(jdbcTemplate), new SimpleSearchQueryConverter(), new SimpleSearchQueryConverter(), new TimeServiceImpl(), true);
@@ -369,7 +372,7 @@ class JdbcScimGroupMembershipManagerTests {
 
         jdbcScimGroupProvisioning.onApplicationEvent(new EntityDeletedEvent<>(loginServer, null, anyZoneId));
 
-        assertThat(jdbcTemplate.queryForObject("select count(*) from group_membership where group_id in (select id from groups where identity_zone_id=?) and origin=?", new Object[]{otherIdentityZone.getId(), LOGIN_SERVER}, Integer.class), is(0));
+        assertThat(jdbcTemplate.queryForObject("select count(*) from group_membership where group_id in (select id from "+groupName+" where identity_zone_id=?) and origin=?", new Object[]{otherIdentityZone.getId(), LOGIN_SERVER}, Integer.class), is(0));
         assertThat(jdbcTemplate.queryForObject("select count(*) from " + groups + " where identity_zone_id=?", new Object[]{otherIdentityZone.getId()}, Integer.class), is(3));
         assertThat(jdbcTemplate.queryForObject("select count(*) from external_group_mapping where origin = ? and identity_zone_id=?", new Object[]{LOGIN_SERVER, otherIdentityZone.getId()}, Integer.class), is(0));
     }
@@ -379,7 +382,7 @@ class JdbcScimGroupMembershipManagerTests {
         String groups = dbUtils.getQuotedIdentifier("groups", jdbcTemplate);
 
         addMembers(jdbcTemplate, uaaIdentityZone.getId());
-        assertThat(jdbcTemplate.queryForObject("select count(*) from group_membership where group_id in (select id from groups where identity_zone_id=?)", new Object[]{uaaIdentityZone.getId()}, Integer.class), is(4));
+        assertThat(jdbcTemplate.queryForObject("select count(*) from group_membership where group_id in (select id from "+groupName+" where identity_zone_id=?)", new Object[]{uaaIdentityZone.getId()}, Integer.class), is(4));
         assertThat(jdbcTemplate.queryForObject("select count(*) from " + groups + " where identity_zone_id=?", new Object[]{uaaIdentityZone.getId()}, Integer.class), is(4));
 
         jdbcScimGroupProvisioning.onApplicationEvent(new EntityDeletedEvent<>(IdentityZone.getUaa(), null, anyZoneId));

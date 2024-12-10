@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.DisabledIf;
+import org.springframework.test.context.junit.jupiter.EnabledIf;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
@@ -36,7 +38,6 @@ class TableAndColumnNormalizationTestConfiguration {
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(PollutionPreventionExtension.class)
-@ActiveProfiles("default")
 @WebAppConfiguration
 @ContextConfiguration(classes = {
         TableAndColumnNormalizationTestConfiguration.class,
@@ -93,7 +94,7 @@ class TableAndColumnNormalizationTest {
                 logger.info("Checking column [" + name + "." + col + "]");
                 if (name != null && DatabaseInformation1_5_3.tableNames.contains(name.toLowerCase())) {
                     logger.info("Validating column [" + name + "." + col + "]");
-                    assertEquals("Column[%s.%s] is not lower case.".formatted(name, col), col.toLowerCase(), col);
+                    assertEquals(col.toLowerCase(), col, "Column[%s.%s] is not lower case.".formatted(name, col));
                 }
             }
             assertTrue(hadSomeResults, "Getting columns from db metadata should have returned some results");
