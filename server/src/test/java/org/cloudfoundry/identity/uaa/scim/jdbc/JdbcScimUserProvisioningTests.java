@@ -28,13 +28,13 @@ import org.cloudfoundry.identity.uaa.zone.beans.IdentityZoneManager;
 import org.cloudfoundry.identity.uaa.zone.beans.IdentityZoneManagerImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
@@ -47,6 +47,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -107,6 +108,10 @@ class JdbcScimUserProvisioningTests {
 
     @Autowired
     NamedParameterJdbcTemplate namedJdbcTemplate;
+
+    @Autowired
+    private Environment enviroment;
+
     private String joeEmail;
     private static final String JOE_NAME = "joe";
 
@@ -416,7 +421,6 @@ class JdbcScimUserProvisioningTests {
     }
 
     @Test
-    @Disabled("Does not yet work on MySQL")
     void retrieveByScimFilter_IncludeInactive() {
         final String originActive = randomString();
         addIdentityProvider(jdbcTemplate, currentIdentityZoneId, originActive, true);
@@ -443,7 +447,10 @@ class JdbcScimUserProvisioningTests {
             );
             Assertions.assertThat(result).isNotNull();
             final List<String> usernames = result.stream().map(ScimUser::getUserName).toList();
-            Assertions.assertThat(usernames).isSorted();
+            if (Arrays.stream(enviroment.getActiveProfiles()).noneMatch("mysql"::equalsIgnoreCase)) {
+                // MySQL has a different ordering, ignore the sort of the two values
+                Assertions.assertThat(usernames).isSorted();
+            }
             return usernames;
         };
 
