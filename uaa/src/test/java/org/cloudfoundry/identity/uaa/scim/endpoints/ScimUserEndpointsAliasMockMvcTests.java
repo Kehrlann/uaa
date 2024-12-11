@@ -242,6 +242,7 @@ public class ScimUserEndpointsAliasMockMvcTests extends AliasMockMvcTestBase {
                 final ScimUser createdScimUser = createScimUser(zone1, scimUser);
 
                 // find alias user
+                //TODO this is flaky
                 final List<ScimUser> usersZone2 = readRecentlyCreatedUsersInZone(zone2);
                 final Optional<ScimUser> aliasUserOpt = usersZone2.stream()
                         .filter(user -> user.getId().equals(createdScimUser.getAliasId()))
