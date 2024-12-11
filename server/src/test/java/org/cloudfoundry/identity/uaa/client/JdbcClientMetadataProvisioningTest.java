@@ -4,6 +4,7 @@ import org.cloudfoundry.identity.uaa.annotations.WithDatabaseContext;
 import org.cloudfoundry.identity.uaa.util.AlphanumericRandomValueStringGenerator;
 import org.cloudfoundry.identity.uaa.zone.MultitenantJdbcClientDetailsService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -79,6 +80,7 @@ class JdbcClientMetadataProvisioningTest {
      * @see <a href="https://dev.mysql.com/doc/refman/8.4/en/sql-mode.html#sqlmode_pad_char_to_full_length"> PAD_CHAR_TO_FULL_LENGTH </a>
      */
     @Test
+    @Disabled("SQL Migration script 4.112 changes this column to varchar because MySQL deprecated PAD_CHAR_TO_FULL_LENGTH")
     void createdByPadsTo36Chars() {
         jdbcTemplate.execute(insertIntoOauthClientDetails(clientId, identityZoneId, "abcdef"));
 
