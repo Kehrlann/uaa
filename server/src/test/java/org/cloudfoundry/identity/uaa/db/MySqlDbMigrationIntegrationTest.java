@@ -30,16 +30,16 @@ public class MySqlDbMigrationIntegrationTest extends DbMigrationIntegrationTestP
 
             @Override
             public void runAssertions() throws Exception {
-                int count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, jdbcTemplate.getDataSource().getConnection().getCatalog(), "oauth_code");
+                int count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, getDatabaseCatalog(), "oauth_code");
                 assertThat("oauth_code is missing primary key", count, is(1));
 
-                count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, jdbcTemplate.getDataSource().getConnection().getCatalog(), "group_membership");
+                count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, getDatabaseCatalog(), "group_membership");
                 assertThat("group_membership is missing primary key", count, is(1));
 
-                count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, jdbcTemplate.getDataSource().getConnection().getCatalog(), "sec_audit");
+                count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, getDatabaseCatalog(), "sec_audit");
                 assertThat("sec_audit is missing primary key", count, is(1));
 
-                count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, jdbcTemplate.getDataSource().getConnection().getCatalog(), "external_group_mapping");
+                count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, getDatabaseCatalog(), "external_group_mapping");
                 assertThat("external_group_membership is missing primary key", count, is(1));
 
                 try {
@@ -79,10 +79,10 @@ public class MySqlDbMigrationIntegrationTest extends DbMigrationIntegrationTestP
 
             @Override
             public void runAssertions() throws Exception {
-                int count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, jdbcTemplate.getDataSource().getConnection().getCatalog(), "group_membership");
+                int count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, getDatabaseCatalog(), "group_membership");
                 assertThat("group_membership is missing primary key", count, is(1));
 
-                count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, jdbcTemplate.getDataSource().getConnection().getCatalog(), "external_group_mapping");
+                count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, getDatabaseCatalog(), "external_group_mapping");
                 assertThat("external_group_mapping is missing primary key", count, is(1));
             }
         });
@@ -94,10 +94,10 @@ public class MySqlDbMigrationIntegrationTest extends DbMigrationIntegrationTestP
     public void everyTableShouldHaveAPrimaryKeyColumn() throws Exception {
         flyway.migrate();
 
-        List<String> tableNames = jdbcTemplate.queryForList(getAllTableNames, String.class, jdbcTemplate.getDataSource().getConnection().getCatalog());
+        List<String> tableNames = jdbcTemplate.queryForList(getAllTableNames, String.class, getDatabaseCatalog());
         assertThat(tableNames, hasSize(greaterThan(0)));
         for (String tableName : tableNames) {
-            int count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, jdbcTemplate.getDataSource().getConnection().getCatalog(), tableName);
+            int count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, getDatabaseCatalog(), tableName);
             assertThat("%s is missing primary key".formatted(tableName), count, greaterThanOrEqualTo(1));
         }
     }

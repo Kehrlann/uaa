@@ -29,16 +29,16 @@ public class HsqlDbMigrationIntegrationTest extends DbMigrationIntegrationTestPa
 
             @Override
             public void runAssertions() throws Exception {
-                int count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, jdbcTemplate.getDataSource().getConnection().getCatalog(), "OAUTH_CODE");
+                int count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, getDatabaseCatalog(), "OAUTH_CODE");
                 assertThat("OAUTH_CODE is missing primary key", count, is(1));
 
-                count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, jdbcTemplate.getDataSource().getConnection().getCatalog(), "GROUP_MEMBERSHIP");
+                count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, getDatabaseCatalog(), "GROUP_MEMBERSHIP");
                 assertThat("GROUP_MEMBERSHIP is missing primary key", count, is(1));
 
-                count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, jdbcTemplate.getDataSource().getConnection().getCatalog(), "SEC_AUDIT");
+                count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, getDatabaseCatalog(), "SEC_AUDIT");
                 assertThat("SEC_AUDIT is missing primary key", count, is(1));
 
-                count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, jdbcTemplate.getDataSource().getConnection().getCatalog(), "EXTERNAL_GROUP_MAPPING");
+                count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, getDatabaseCatalog(), "EXTERNAL_GROUP_MAPPING");
                 assertThat("EXTERNAL_GROUP_MAPPING is missing primary key", count, is(1));
 
                 try {
@@ -56,10 +56,10 @@ public class HsqlDbMigrationIntegrationTest extends DbMigrationIntegrationTestPa
     public void everyTableShouldHaveAPrimaryKeyColumn() throws Exception {
         flyway.migrate();
 
-        List<String> tableNames = jdbcTemplate.queryForList(getAllTableNames, String.class, jdbcTemplate.getDataSource().getConnection().getCatalog());
+        List<String> tableNames = jdbcTemplate.queryForList(getAllTableNames, String.class, getDatabaseCatalog());
         assertThat(tableNames, hasSize(greaterThan(0)));
         for (String tableName : tableNames) {
-            int count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, jdbcTemplate.getDataSource().getConnection().getCatalog(), tableName);
+            int count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, getDatabaseCatalog(), tableName);
             assertThat("%s is missing primary key".formatted(tableName), count, greaterThanOrEqualTo(1));
         }
     }

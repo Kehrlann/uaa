@@ -22,10 +22,10 @@ public class PostgresDbMigrationIntegrationTest extends DbMigrationIntegrationTe
     public void everyTableShouldHaveAPrimaryKeyColumn() throws Exception {
         flyway.migrate();
 
-        List<String> tableNames = jdbcTemplate.queryForList(getAllTableNames, String.class, jdbcTemplate.getDataSource().getConnection().getCatalog());
+        List<String> tableNames = jdbcTemplate.queryForList(getAllTableNames, String.class, getDatabaseCatalog());
         assertThat(tableNames, hasSize(greaterThan(0)));
         for (String tableName : tableNames) {
-            int count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, jdbcTemplate.getDataSource().getConnection().getCatalog(), tableName, "%" + tableName + "_pk%");
+            int count = jdbcTemplate.queryForObject(checkPrimaryKeyExists, Integer.class, getDatabaseCatalog(), tableName, "%" + tableName + "_pk%");
             assertThat("%s is missing primary key".formatted(tableName), count, greaterThanOrEqualTo(1));
         }
 

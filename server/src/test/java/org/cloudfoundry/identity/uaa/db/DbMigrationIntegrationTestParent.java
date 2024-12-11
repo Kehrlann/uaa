@@ -45,4 +45,8 @@ public abstract class DbMigrationIntegrationTestParent {
             TestUtils.cleanAndSeedDb(jdbcTemplate);
         }
     }
+
+    protected String getDatabaseCatalog() {
+        return MigrationTest.getDatabaseCatalog(jdbcTemplate);
+    }
 }
