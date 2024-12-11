@@ -6,6 +6,7 @@ import org.cloudfoundry.identity.uaa.scim.ScimGroupMember;
 import org.cloudfoundry.identity.uaa.scim.ScimUser;
 import org.cloudfoundry.identity.uaa.scim.endpoints.ScimGroupEndpoints;
 import org.cloudfoundry.identity.uaa.scim.endpoints.ScimUserEndpoints;
+import org.cloudfoundry.identity.uaa.util.beans.DbUtils;
 import org.cloudfoundry.identity.uaa.zone.IdentityZone;
 import org.cloudfoundry.identity.uaa.zone.IdentityZoneEndpoints;
 import org.cloudfoundry.identity.uaa.zone.IdentityZoneHolder;
@@ -91,9 +92,11 @@ public class TestZonifyGroupSchema_V2_4_1 {
     }
 
     @Test
-    void test_Ensure_That_New_Fields_NotNull() {
-        assertThat(webApplicationContext.getBean(JdbcTemplate.class).queryForObject("SELECT count(*) FROM external_group_mapping WHERE origin IS NULL", Integer.class), is(0));
-        assertThat(webApplicationContext.getBean(JdbcTemplate.class).queryForObject("SELECT count(*) FROM groups WHERE identity_zone_id IS NULL", Integer.class), is(0));
+    void test_Ensure_That_New_Fields_NotNull() throws Exception {
+        JdbcTemplate jdbcTemplate = webApplicationContext.getBean(JdbcTemplate.class);
+        DbUtils dbUtils = webApplicationContext.getBean(DbUtils.class);
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM external_group_mapping WHERE origin IS NULL", Integer.class), is(0));
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM "+ dbUtils.getQuotedIdentifier("groups", jdbcTemplate) +" WHERE identity_zone_id IS NULL", Integer.class), is(0));
     }
 
 }

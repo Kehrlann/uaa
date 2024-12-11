@@ -38,6 +38,7 @@ import org.cloudfoundry.identity.uaa.util.AlphanumericRandomValueStringGenerator
 import org.cloudfoundry.identity.uaa.util.JsonUtils;
 import org.cloudfoundry.identity.uaa.util.KeyWithCertTest;
 import org.cloudfoundry.identity.uaa.util.SetServerNameRequestPostProcessor;
+import org.cloudfoundry.identity.uaa.util.beans.DbUtils;
 import org.cloudfoundry.identity.uaa.zone.BrandingInformation;
 import org.cloudfoundry.identity.uaa.zone.BrandingInformation.Banner;
 import org.cloudfoundry.identity.uaa.zone.Consent;
@@ -172,6 +173,8 @@ class IdentityZoneEndpointsMockMvcTests {
     private MockMvc mockMvc;
     private TestClient testClient;
 
+    private DbUtils dbUtils;
+
     @BeforeEach
     void setUp(
             @Autowired WebApplicationContext webApplicationContext,
@@ -185,6 +188,8 @@ class IdentityZoneEndpointsMockMvcTests {
         this.webApplicationContext = webApplicationContext;
         this.mockMvc = mockMvc;
         this.testClient = testClient;
+
+        dbUtils = webApplicationContext.getBean(DbUtils.class);
 
         UaaClientDetails uaaAdminClient = new UaaClientDetails("uaa-admin-" + generator.generate().toLowerCase(),
                 null,
@@ -1737,7 +1742,7 @@ class IdentityZoneEndpointsMockMvcTests {
 
         assertThat(template.queryForObject("select count(*) from identity_zone where id=?", new Object[]{zone.getId()}, Integer.class)).isZero();
         assertThat(template.queryForObject("select count(*) from oauth_client_details where identity_zone_id=?", new Object[]{zone.getId()}, Integer.class)).isZero();
-        assertThat(template.queryForObject("select count(*) from groups where identity_zone_id=?", new Object[]{zone.getId()}, Integer.class)).isZero();
+        assertThat(template.queryForObject("select count(*) from "+dbUtils.getQuotedIdentifier("groups", template)+" where identity_zone_id=?", new Object[]{zone.getId()}, Integer.class)).isZero();
         assertThat(template.queryForObject("select count(*) from sec_audit where identity_zone_id=?", new Object[]{zone.getId()}, Integer.class)).isZero();
         assertThat(template.queryForObject("select count(*) from users where identity_zone_id=?", new Object[]{zone.getId()}, Integer.class)).isZero();
         assertThat(template.queryForObject("select count(*) from external_group_mapping where origin=?", new Object[]{LOGIN_SERVER}, Integer.class)).isZero();

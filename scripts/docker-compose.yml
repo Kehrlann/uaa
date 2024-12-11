@@ -2,7 +2,7 @@ name: uaa
 
 services:
   postgres:
-    image: "postgres:17.2"
+    image: "postgres:15"
     ports:
       - 5432:5432
     volumes:
@@ -10,7 +10,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=changeme
   mysql:
-    image: "mysql:5.7.44-oraclelinux7"
+    image: "mysql:8"
     ports:
     - 3306:3306
     volumes:

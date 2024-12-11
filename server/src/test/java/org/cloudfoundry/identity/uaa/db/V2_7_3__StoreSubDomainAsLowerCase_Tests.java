@@ -6,6 +6,7 @@ import org.cloudfoundry.identity.uaa.zone.IdentityZoneProvisioning;
 import org.cloudfoundry.identity.uaa.zone.JdbcIdentityZoneProvisioning;
 import org.cloudfoundry.identity.uaa.zone.MultitenancyFixture;
 import org.flywaydb.core.api.migration.Context;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.cloudfoundry.identity.uaa.oauth.common.util.RandomValueStringGenerator;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -36,15 +38,23 @@ class V2_7_3__StoreSubDomainAsLowerCase_Tests {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    private Connection connection;
+
+    @AfterEach
+    void closeConnection() {
+        try {
+            connection.close();
+        } catch (Exception ignore) {
+        }
+    }
     @BeforeEach
     void setUpDuplicateZones() throws SQLException {
         provisioning = new JdbcIdentityZoneProvisioning(jdbcTemplate);
         migration = new V2_7_3__StoreSubDomainAsLowerCase();
         generator = new RandomValueStringGenerator(6);
-
+        connection = jdbcTemplate.getDataSource().getConnection();
         context = mock(Context.class);
-        when(context.getConnection()).thenReturn(
-                jdbcTemplate.getDataSource().getConnection());
+        when(context.getConnection()).thenReturn(connection);
     }
 
     @Test
