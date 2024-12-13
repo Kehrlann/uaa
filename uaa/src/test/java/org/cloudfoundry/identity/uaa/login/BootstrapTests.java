@@ -5,6 +5,7 @@ import org.assertj.core.api.Condition;
 import org.cloudfoundry.identity.uaa.extensions.PollutionPreventionExtension;
 import org.cloudfoundry.identity.uaa.extensions.SpringProfileCleanupExtension;
 import org.cloudfoundry.identity.uaa.extensions.SystemPropertiesCleanupExtension;
+import org.cloudfoundry.identity.uaa.extensions.profiles.DisabledIfProfile;
 import org.cloudfoundry.identity.uaa.impl.config.IdentityZoneConfigurationBootstrap;
 import org.cloudfoundry.identity.uaa.impl.config.YamlServletProfileInitializer;
 import org.cloudfoundry.identity.uaa.provider.SamlIdentityProviderDefinition;
@@ -57,6 +58,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @ExtendWith(PollutionPreventionExtension.class)
 @ExtendWith(SpringProfileCleanupExtension.class)
+@DisabledIfProfile({"mysql", "postgresql"})
 class BootstrapTests {
     private static final String LOGIN_IDP_METADATA = "login.idpMetadata";
     private static final String LOGIN_IDP_ENTITY_ALIAS = "login.idpEntityAlias";
