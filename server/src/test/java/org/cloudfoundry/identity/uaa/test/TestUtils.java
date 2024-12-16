@@ -80,6 +80,26 @@ public class TestUtils {
         cleanAndSeedDb(jdbcTemplate);
 
         bootstrapDb(applicationContext);
+        resetPasswdLastModified(jdbcTemplate);
+    }
+
+    /**
+     * Ensure all {@code users} have "updated their password" in the past. This is important because
+     * of timezone differences with the database, and our forcing of the timezone to UTC for a running
+     * a specific test. If a user is created with {@code passwd_lastmodified} at 10:00+01:00, and
+     * the timezone of the test is changed to UTC, then the login time will be 09:00+00:00, and
+     * when timezones are stripped, this means "the password has been changed after the login time".
+     * <p>
+     * This triggers behavior in {@link org.cloudfoundry.identity.uaa.authentication.SessionResetFilter},
+     * which logs the user out.
+     *
+     * @param jdbcTemplate -
+     */
+    private static void resetPasswdLastModified(JdbcTemplate jdbcTemplate) {
+        jdbcTemplate.update(
+                "update users set passwd_lastmodified = ? where passwd_lastmodified is not null",
+                new Timestamp(System.currentTimeMillis() - 24 * 60 * 60 * 1000)
+        );
     }
 
     private static void seedUaaZoneSimilarToHowTheRealFlywayMigrationDoesIt(JdbcTemplate jdbcTemplate) {
