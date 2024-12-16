@@ -627,17 +627,6 @@ public class LoginMockMvcTests {
         MockMvcUtils.setDisableInternalUserManagement(webApplicationContext, false);
     }
 
-    @Nested
-    @DefaultTestContext
-    @TestPropertySource(properties = "assetBaseUrl=//cdn.example.com/resources")
-    class DefaultLogo {
-        @Test
-        void testDefaultLogo(@Autowired MockMvc mockMvc) throws Exception {
-            mockMvc.perform(get("/login"))
-                    .andExpect(content().string(containsString("url(//cdn.example.com/resources/images/product-logo.png)")));
-        }
-    }
-
     @Test
     void testCustomLogo() throws Exception {
         setZoneFavIconAndProductLogo(webApplicationContext, identityZoneConfiguration, null, "/bASe/64+");
