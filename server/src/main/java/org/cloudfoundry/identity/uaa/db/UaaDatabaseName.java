@@ -14,6 +14,7 @@ public class UaaDatabaseName {
             return UAA_DB_NAME;
         }
 
-        return UAA_DB_NAME + "_" + gradleWorkerId;
+        var boundedWorkerId = (Integer.parseInt(gradleWorkerId) % 24) + 1;
+        return UAA_DB_NAME + "_" + boundedWorkerId;
     }
 }

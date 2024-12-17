@@ -105,7 +105,11 @@ subprojects {
     [compileJava, compileTestJava]*.options*.compilerArgs = ["-Xlint:none", "-nowarn"]
 
     test {
-        maxParallelForks = 1
+        // Count available cores. We assume 2 logical cores per physical core.
+        // In case there's only 1 CPU, we count 1
+        var availableCores = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1.0)
+        // We want 4 processes in parallel, but not more than available cores.
+        maxParallelForks = Math.min(availableCores, 4)
         // when failFast = true AND retry is on, there is a serious issue:
         // gradle might stop the test run due to the failFast but still concludes with BUILD SUCCESSFUL (if the retry is successful)
         failFast = false
